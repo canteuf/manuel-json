@@ -1,0 +1,7 @@
+{
+  "type": "https://example.com/erreurs/solde-insuffisant",
+  "title": "Solde insuffisant",
+  "status": 403,
+  "detail": "Le solde est de 3000 XAF, le retrait demande est de 5000 XAF.",
+  "instance": "/comptes/12345/retraits/abc"
+}

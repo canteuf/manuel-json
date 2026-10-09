@@ -1,0 +1,9 @@
+{
+  "exporteLe": "2026-10-08",
+  "utilisateurs": [
+    { "nom": "Ada", "statut": "actif" },
+    { "nom": "Grace", "statut": "inactif" },
+    { "nom": "Katherine", "statut": "actif" },
+    { "nom": "Margaret", "statut": "actif" }
+  ]
+}

@@ -1,0 +1,6 @@
+[
+  { "op": "test", "path": "/statut", "value": "en_attente" },
+  { "op": "replace", "path": "/statut", "value": "validee" },
+  { "op": "add", "path": "/validePar", "value": "Administrateur" },
+  { "op": "remove", "path": "/brouillon" }
+]

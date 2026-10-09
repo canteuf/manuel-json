@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/produit.json",
+  "title": "Produit",
+  "type": "object",
+  "properties": {
+    "sku": { "type": "string", "pattern": "^[A-Z]{3}-[0-9]{4}$" },
+    "nom": { "type": "string", "minLength": 3, "maxLength": 100 },
+    "prix": { "type": "number", "exclusiveMinimum": 0 },
+    "categories": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "statut": { "enum": ["brouillon", "publie", "archive"] },
+    "creeLe": { "type": "string", "format": "date-time" }
+  },
+  "required": ["sku", "nom", "prix", "categories"],
+  "additionalProperties": false
+}

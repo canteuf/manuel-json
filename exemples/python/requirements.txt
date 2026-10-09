@@ -1,0 +1,7 @@
+pydantic[email]>=2.7
+jsonschema>=4.18
+rfc3339-validator   # sans ce paquet, jsonschema ignore le format "date-time"
+ijson>=3.2
+pandas>=2.2
+jsonpatch>=1.33     # pour tester les exemples JSON Patch et JSON Pointer
+pytest>=8

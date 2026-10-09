@@ -1,0 +1,5 @@
+{
+  "utilisateurs": [
+    { "nom": "Alice", "contacts": { "email/pro": "alice@example.com" } }
+  ]
+}

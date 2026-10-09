@@ -1,0 +1,15 @@
+{
+  "utilisateurId": 1048576,
+  "pseudonyme": "AdaLovelace",
+  "estActif": true,
+  "profil": {
+    "prenom": "Ada",
+    "nom": "Byron",
+    "titre": null
+  },
+  "roles": ["chercheuse", "pionniere", "admin"],
+  "coordonnees": {
+    "latitude": 51.5074,
+    "longitude": -0.1278
+  }
+}

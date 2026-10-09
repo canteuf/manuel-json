@@ -1,0 +1,890 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{charter}
+\renewcommand{\ttdefault}{lmtt} % police machine qui possede une graisse grasse
+\usepackage{amsmath,amssymb}
+\usepackage[margin=1in,headheight=14pt]{geometry}
+\usepackage{graphicx,booktabs,tabularx,hyperref,xcolor,fancyhdr,microtype,listings}
+\usepackage{caption}
+\usepackage{tikz} % page de garde
+\usepackage{titlesec}
+\usepackage{float} % option [H] : tableau place exactement a cet endroit
+
+% Couleurs thématiques
+\definecolor{primary}{RGB}{18, 52, 86}      % Bleu marine profond
+\definecolor{secondary}{RGB}{41, 128, 185}  % Bleu acier
+\definecolor{accent}{RGB}{211, 84, 0}       % Ambre / Orange brûlé
+\definecolor{darkgray}{RGB}{45, 52, 54}     % Texte gris foncé
+\definecolor{lightgray}{RGB}{245, 247, 250} % Fond neutre
+\definecolor{codebg}{RGB}{248, 249, 250}    % Fond code
+\definecolor{codeframe}{RGB}{222, 226, 230} % Bordure code
+\definecolor{kwcolor}{RGB}{0, 51, 153}      % Mots-clés
+\definecolor{strcolor}{RGB}{163, 21, 21}    % Chaînes
+\definecolor{comcolor}{RGB}{108, 117, 125}  % Commentaires
+\definecolor{numcolor}{RGB}{9, 132, 227}    % Nombres
+
+% Espacements verticaux
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\parindent}{0pt}
+\setlength{\emergencystretch}{3em} % evite que les mots en police machine debordent de la marge
+
+% Configuration des hyperliens
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    citecolor=primary,
+    urlcolor=secondary,
+    pdfauthor={Teufack Doury Cantor},
+    pdftitle={Manuel de reference : le format JSON},
+    pdfsubject={Normes, validation, securite et pratiques de JSON en JavaScript, TypeScript, Python et PostgreSQL}
+}
+
+% En-têtes et pieds de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{darkgray}\textit{Manuel de référence : le format JSON}}
+\fancyhead[R]{\small\color{secondary}\textbf{JavaScript, Python et PostgreSQL}}
+\fancyfoot[C]{\small\color{darkgray}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.2pt}
+
+% Boîtes d'avertissement et d'emphase
+\newcommand{\takeaway}[2]{%
+  \vspace{10pt}%
+  \noindent\colorbox{primary!7}{%
+    \parbox{\dimexpr\textwidth-2\fboxsep\relax}{%
+      \vspace{4pt}\textbf{\color{primary}#1 :}\hspace{0.5em}\color{darkgray}#2\vspace{4pt}%
+    }%
+  }%
+  \vspace{10pt}%
+}
+
+\newcommand{\warningbox}[2]{%
+  \vspace{10pt}%
+  \noindent\colorbox{accent!10}{%
+    \parbox{\dimexpr\textwidth-2\fboxsep\relax}{%
+      \vspace{4pt}\textbf{\color{accent}#1 :}\hspace{0.5em}\color{darkgray}#2\vspace{4pt}%
+    }%
+  }%
+  \vspace{10pt}%
+}
+
+% Configuration de Listings pour le code
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeframe},
+    columns=fullflexible,
+    keepspaces=true,
+    upquote=true,
+    breaklines=true,
+    breakatwhitespace=true,
+    showstringspaces=false,
+    tabsize=2,
+    captionpos=b,
+    aboveskip=14pt,
+    belowskip=14pt,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=6pt,
+    xleftmargin=12pt,
+    framexleftmargin=12pt,
+    extendedchars=true,
+    literate=
+      {é}{{\'e}}1
+      {è}{{\`e}}1
+      {ê}{{\^e}}1
+      {ë}{{\"e}}1
+      {à}{{\`a}}1
+      {â}{{\^a}}1
+      {î}{{\^i}}1
+      {ï}{{\"i}}1
+      {ô}{{\^o}}1
+      {ù}{{\`u}}1
+      {û}{{\^u}}1
+      {ç}{{\c{c}}}1
+      {É}{{\'E}}1
+      {È}{{\`E}}1
+      {Ê}{{\^E}}1
+      {À}{{\`A}}1
+      {Ç}{{\c{C}}}1
+}
+
+\lstdefinelanguage{json}{
+    string=[s]{"}{"},
+    stringstyle=\color{strcolor},
+    literate=
+     *{0}{{{\color{numcolor}0}}}{1}
+      {1}{{{\color{numcolor}1}}}{1}
+      {2}{{{\color{numcolor}2}}}{1}
+      {3}{{{\color{numcolor}3}}}{1}
+      {4}{{{\color{numcolor}4}}}{1}
+      {5}{{{\color{numcolor}5}}}{1}
+      {6}{{{\color{numcolor}6}}}{1}
+      {7}{{{\color{numcolor}7}}}{1}
+      {8}{{{\color{numcolor}8}}}{1}
+      {9}{{{\color{numcolor}9}}}{1}
+      {:}{{{\color{primary}:}}}{1}
+      {,}{{{\color{primary},}}}{1}
+      {\{}{{{\color{primary}\{}}}{1}
+      {\}}{{{\color{primary}\}}}}{1}
+      {[}{{{\color{primary}[}}}{1}
+      {]}{{{\color{primary}]}}}{1}
+      {é}{{\'e}}1
+      {è}{{\`e}}1
+      {ê}{{\^e}}1
+      {à}{{\`a}}1
+      {ç}{{\c{c}}}1,
+    morekeywords={true, false, null},
+    keywordstyle=\color{kwcolor}\bfseries
+}
+
+\lstdefinelanguage{javascript}{
+    keywords={typeof, new, true, false, catch, function, return, null, switch, var, if, in, while, do, else, case, break, const, let, async, await, try, finally, class, export, import, from, extends, type, interface, of, as},
+    keywordstyle=\color{kwcolor}\bfseries,
+    ndkeywords={class, export, boolean, throw, implements, import, this},
+    ndkeywordstyle=\color{secondary}\bfseries,
+    identifierstyle=\color{black},
+    sensitive=false,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{comcolor}\ttfamily,
+    stringstyle=\color{strcolor}\ttfamily,
+    morestring=[b]',
+    morestring=[b]",
+    morestring=[b]`
+}
+
+\lstdefinelanguage{python}{
+    keywords={and, as, assert, break, class, continue, def, del, elif, else, except, False, finally, for, from, global, if, import, in, is, lambda, None, nonlocal, not, or, pass, raise, return, True, try, while, with, yield},
+    keywordstyle=\color{kwcolor}\bfseries,
+    comment=[l]{\#},
+    commentstyle=\color{comcolor}\ttfamily,
+    stringstyle=\color{strcolor}\ttfamily,
+    morestring=[b]',
+    morestring=[b]"
+}
+
+\lstdefinestyle{sql}{
+    language=SQL,
+    morekeywords={SCHEMA, IF, EXISTS, GENERATED, ALWAYS, IDENTITY, USING, GIN, jsonb, json, bigint, text},
+    keywordstyle=\color{kwcolor}\bfseries,
+    commentstyle=\color{comcolor}\ttfamily,
+    stringstyle=\color{strcolor}\ttfamily
+}
+
+% Inclut un fichier du dossier exemples/ dans un bloc insecable, avec son chemin en legende.
+% Usage : \exemple[options listings]{chemin relatif a exemples/}{legende}
+\newcommand{\exemple}[3][]{%
+  \par\addvspace{6pt}\noindent\begin{minipage}{\linewidth}%
+  \lstinputlisting[#1,caption={#3 {\footnotesize\color{darkgray}(\texttt{exemples/\detokenize{#2}})}}]{exemples/#2}%
+  \end{minipage}\par\addvspace{6pt}}
+
+% ==============================================================================
+% MISE EN PAGE GENERALE
+% ==============================================================================
+% Titres : bleu marine, chaque section sur une nouvelle page
+\titleformat{\section}{\Large\bfseries\color{primary}}{\thesection}{0.8em}{}
+\titlespacing*{\section}{0pt}{0pt}{16pt}
+\titleformat{\subsection}{\large\bfseries\color{primary}}{\thesubsection}{0.8em}{}
+\titlespacing*{\subsection}{0pt}{20pt}{8pt}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{secondary}}{\thesubsubsection}{0.8em}{}
+\titlespacing*{\subsubsection}{0pt}{16pt}{6pt}
+\newcommand{\sectionbreak}{\clearpage}
+
+% Legendes en francais : "Tableau 1 : ...", "Code 3 : ..."
+\DeclareCaptionLabelSeparator{fr}{~:\ }
+\captionsetup{labelsep=fr, font=small, labelfont={bf,color=primary}}
+\captionsetup[lstlisting]{skip=6pt}
+\captionsetup[table]{skip=8pt}
+\renewcommand{\tablename}{Tableau}
+\renewcommand{\lstlistingname}{Code}
+\renewcommand{\contentsname}{Table des matières}
+
+% Listings insecables : un bloc de code passe entier a la page suivante au lieu d'etre coupe
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{lstlisting}{\par\addvspace{6pt}\noindent\begin{minipage}{\linewidth}}
+\AfterEndEnvironment{lstlisting}{\end{minipage}\par\addvspace{6pt}}
+
+% Sommaire plus compact (1 em par defaut avant chaque section) pour qu'il tienne sur une page
+\makeatletter
+\patchcmd{\l@section}{1.0em}{0.55em}{}{}
+\makeatother
+
+% Espace autour des tableaux flottants
+\setlength{\floatsep}{14pt plus 4pt minus 4pt}
+\setlength{\textfloatsep}{18pt plus 4pt minus 4pt}
+\setlength{\intextsep}{16pt plus 4pt minus 4pt}
+
+\begin{document}
+
+% ==============================================================================
+% PAGE DE TITRE
+% ==============================================================================
+\begin{titlepage}
+\thispagestyle{empty}
+\null
+\begin{tikzpicture}[remember picture, overlay]
+  % Bandeau bleu marine sur toute la largeur, avec un filet ambre en dessous
+  \fill[primary] (current page.north west) rectangle ([yshift=-0.40\paperheight]current page.north east);
+  \fill[accent] ([yshift=-0.40\paperheight]current page.north west) rectangle ([yshift=-0.40\paperheight-4pt]current page.north east);
+
+  % Titre, centre dans le bandeau et par rapport a la page
+  % (la police est passee avec font= : changee a l'interieur du noeud, elle casse les espaces)
+  \node[font=\large\scshape, text=white!75!primary] at ([yshift=-0.135\paperheight]current page.north) {Manuel de référence};
+  \node[font=\fontsize{42}{48}\selectfont\bfseries, text=white] at ([yshift=-0.20\paperheight]current page.north) {Le format JSON};
+  \node[font=\large, text=white!85!primary] at ([yshift=-0.255\paperheight]current page.north) {JavaScript Object Notation};
+
+  % Sous-titre et technologies couvertes
+  \node[anchor=north, align=center, text width=0.75\paperwidth, font=\Large, text=darkgray] at ([yshift=-0.47\paperheight]current page.north) {%
+    {Normes, validation, pièges de sécurité,\\[0.15cm]
+     JavaScript/TypeScript, Python et PostgreSQL}%
+  };
+  \node[font=\small, text=secondary] at ([yshift=-0.565\paperheight]current page.north) {%
+    Node.js 22 \textperiodcentered{} TypeScript \textperiodcentered{} Python 3.10+ \textperiodcentered{} PostgreSQL \textperiodcentered{} Exemples testés};
+
+  % Auteur et version en bas de page
+  \node[anchor=south, align=center] at ([yshift=0.06\paperheight]current page.south) {%
+    {\color{primary}\rule{12cm}{0.8pt}}\\[0.5cm]
+    {\large\bfseries\color{primary}Teufack Doury Cantor}\\[0.15cm]
+    {\color{darkgray}\itshape Master en data science et machine learning}\\[0.9cm]
+    {\small\color{darkgray}Version 1.0 \textperiodcentered{} Octobre 2026}%
+  };
+\end{tikzpicture}
+\end{titlepage}
+
+% ==============================================================================
+% TABLE DES MATIÈRES
+% ==============================================================================
+\setcounter{tocdepth}{2}
+\newpage
+{
+  \footnotesize
+  \renewcommand{\baselinestretch}{0.92}
+  \setlength{\parskip}{0pt}
+  \tableofcontents
+}
+\newpage
+
+% ==============================================================================
+% A PROPOS
+% ==============================================================================
+\section{À propos de ce manuel}
+
+\subsection{Public visé}
+Ce manuel s'adresse aux développeurs qui manipulent du JSON tous les jours~: appels d'API, fichiers de configuration, échanges entre une interface JavaScript et un serveur Python, colonnes de base de données. Il suppose de connaître les bases de JavaScript ou de Python. Il ne cherche pas à tout dire sur JSON. Il rassemble les règles des normes, les fonctions utiles dans chaque langage et, surtout, les pièges qui produisent des bogues en production.
+
+\subsection{Comment le lire}
+Les sections se lisent indépendamment. Les sections~\ref{sec:normes} et~\ref{sec:grammaire} posent les règles du format. Les sections~\ref{sec:js} et~\ref{sec:python} couvrent JavaScript, TypeScript et Python. La section~\ref{sec:schema} traite de la validation, la section~\ref{sec:sql} du stockage dans PostgreSQL et la section~\ref{sec:securite} des risques de sécurité. La fiche de référence de la section~\ref{sec:fiche} résume l'essentiel.
+
+\subsection{Les exemples}
+Chaque bloc de code dont la légende indique un chemin, comme \nolinkurl{exemples/python/01_dumps.py}, est un fichier réel du dossier \texttt{exemples/} livré avec ce manuel. Le document inclut ces fichiers directement~: le code imprimé est celui qui a été exécuté. Une suite de tests lance chaque exemple et vérifie sa sortie (voir \texttt{exemples/README.md}). Les sorties indiquées en commentaire ont été obtenues avec Python~3.13, Node.js~22, PostgreSQL~16, Zod~4 et Pydantic~2. Les commandes de terminal sont écrites pour PowerShell sous Windows.
+
+% ==============================================================================
+% NORMES
+% ==============================================================================
+\section{Le format JSON et ses normes}
+\label{sec:normes}
+
+\subsection{Origines}
+JSON (\textit{JavaScript Object Notation}) est apparu au début des années 2000. Douglas Crockford l'a décrit comme un sous-ensemble de la notation des objets littéraux de JavaScript, assez simple pour être lu par n'importe quel langage~\cite{crockford2008js}. Il a progressivement remplacé XML dans les API web, parce qu'un document JSON se convertit directement en dictionnaires, en tableaux et en valeurs simples dans la plupart des langages, sans bibliothèque lourde.
+
+\subsection{Les textes de référence}
+Plusieurs documents décrivent JSON (tableau~\ref{tab:normes}). Ils sont compatibles entre eux, et la RFC~8259 est celui à consulter en pratique~: elle contient la grammaire, les règles d'encodage et les recommandations d'interopérabilité que ce manuel cite souvent.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Document} & \textbf{Date} & \textbf{Apport} \\
+\midrule
+RFC 4627~\cite{crockford2006rfc4627} & juillet 2006 & Premier texte, informatif. Définit le type de média \texttt{application/json} et impose un objet ou un tableau à la racine. \\
+RFC 7159~\cite{bray2014rfc7159} & mars 2014 & Autorise n'importe quelle valeur à la racine, un nombre seul par exemple. \\
+RFC 8259~\cite{bray2017rfc8259} & décembre 2017 & Version actuelle, classée Internet Standard (STD~90). Impose l'UTF-8 entre systèmes ouverts et interdit d'ajouter un BOM. \\
+ECMA-404~\cite{ecma404} & décembre 2017 & Deuxième édition. Décrit la grammaire seule, sans règles réseau. \\
+ISO/IEC 21778~\cite{iso21778} & 2017 & Reprend ECMA-404 comme norme internationale. \\
+\bottomrule
+\end{tabularx}
+\caption{Les textes qui définissent JSON.}
+\label{tab:normes}
+\end{table}
+
+\subsection{JSON n'est pas du JavaScript}
+Un texte JSON ressemble à un objet JavaScript, mais ses règles sont plus strictes. Les clés doivent être entre guillemets doubles droits (\texttt{"}), alors que JavaScript accepte des clés sans guillemets ou entre apostrophes. Les chaînes n'acceptent ni apostrophes ni accents graves (\textit{backticks}). La virgule après le dernier élément est interdite, tout comme les commentaires. Douglas Crockford a expliqué en 2012 avoir retiré les commentaires parce que certains développeurs s'en servaient pour transmettre des directives à leurs outils.
+
+JSON ne connaît que six types (section~\ref{sec:types}). \texttt{undefined}, \texttt{Symbol}, \texttt{BigInt}, les fonctions, les dates et les expressions régulières n'ont pas d'équivalent. Selon le cas, \texttt{JSON.stringify} les ignore, les convertit ou lève une erreur (section~\ref{sec:js}). Enfin, un texte JSON se lit toujours avec un parseur (\texttt{JSON.parse}, \texttt{json.loads}), jamais avec \texttt{eval}, qui exécuterait le code qu'un attaquant aurait glissé dans le texte.
+
+% ==============================================================================
+% GRAMMAIRE
+% ==============================================================================
+\section{Grammaire et types}
+\label{sec:grammaire}
+
+\subsection{Structure d'un texte JSON}
+Un texte JSON contient une seule valeur, entourée d'espaces facultatifs. Seuls quatre caractères comptent comme espaces~: l'espace (U+0020), la tabulation (U+0009), le saut de ligne (U+000A) et le retour chariot (U+000D). La RFC~8259 décrit la grammaire en ABNF, la notation de grammaire des RFC définie par la RFC~5234. Voici ses règles principales, simplifiées~:
+
+\begin{lstlisting}[caption={Extrait simplifié de la grammaire ABNF de la RFC 8259}]
+JSON-text = ws value ws
+value     = false / null / true / object / array / number / string
+object    = begin-object [ member *( value-separator member ) ] end-object
+member    = string name-separator value
+array     = begin-array [ value *( value-separator value ) ] end-array
+number    = [ minus ] int [ frac ] [ exp ]
+int       = zero / ( digit1-9 *DIGIT )
+frac      = decimal-point 1*DIGIT
+exp       = e [ minus / plus ] 1*DIGIT
+string    = quotation-mark *char quotation-mark
+ws        = *( %x20 / %x09 / %x0A / %x0D )
+\end{lstlisting}
+
+La règle \texttt{int} explique deux erreurs fréquentes~: un nombre ne peut pas commencer par un zéro suivi d'autres chiffres, et seul le signe moins est autorisé devant un nombre. Le code~\ref{code:utilisateur} montre un document qui utilise les six types.
+
+\exemple[language=json,label=code:utilisateur]{json/utilisateur.json}{Un document qui utilise les six types}
+
+\subsection{Erreurs de syntaxe courantes}
+Le tableau~\ref{tab:erreurs} rassemble les erreurs qui reviennent le plus souvent, en particulier quand un texte JSON est écrit à la main ou copié depuis du code JavaScript.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\textbf{Erreur} & \textbf{Invalide} & \textbf{Correct} \\
+\midrule
+Clé sans guillemets & \texttt{\{id: 42\}} & \texttt{\{"id": 42\}} \\
+Apostrophes & \texttt{\{\textquotesingle{}cle\textquotesingle{}: \textquotesingle{}valeur\textquotesingle{}\}} & \texttt{\{"cle": "valeur"\}} \\
+Virgule finale (objet) & \texttt{\{"a": 1, "b": 2,\}} & \texttt{\{"a": 1, "b": 2\}} \\
+Virgule finale (tableau) & \texttt{[1, 2, 3,]} & \texttt{[1, 2, 3]} \\
+Zéro en tête & \texttt{\{"compteur": 007\}} & \texttt{\{"compteur": 7\}} \\
+Décimal sans partie entière & \texttt{\{"taux": .25\}} & \texttt{\{"taux": 0.25\}} \\
+Valeur \texttt{undefined} & \texttt{\{"statut": undefined\}} & \texttt{\{"statut": null\}} ou clé omise \\
+Commentaire & \texttt{// port}\newline\texttt{\{"port": 8080\}} & Supprimer le commentaire \\
+\bottomrule
+\end{tabularx}
+\caption{Erreurs de syntaxe fréquentes et leur correction.}
+\label{tab:erreurs}
+\end{table}
+
+\subsection{Les six types}
+\label{sec:types}
+
+\subsubsection{Chaîne (\texttt{string})}
+Une chaîne est délimitée par des guillemets doubles. Tout caractère Unicode peut y figurer tel quel, sauf le guillemet, la barre oblique inversée et les caractères de contrôle U+0000 à U+001F, qui doivent être échappés. Le tableau~\ref{tab:echappements} de la fiche de référence liste les séquences d'échappement. La forme \texttt{\textbackslash uXXXX} désigne un caractère par son code hexadécimal. Au-delà de U+FFFF, pour les émojis par exemple, il faut une paire de substitution UTF-16~: la fusée U+1F680 s'écrit \texttt{"\textbackslash uD83D\textbackslash uDE80"}.
+
+\subsubsection{Nombre (\texttt{number})}
+JSON ne distingue pas les entiers des décimaux. Un nombre a une partie entière, éventuellement précédée d'un signe moins, une partie décimale facultative après un point, et un exposant facultatif introduit par \texttt{e} ou \texttt{E}. Trois écritures sont interdites~: un zéro en tête (\texttt{012}), le signe plus (\texttt{+5}), et les valeurs spéciales \texttt{NaN} et \texttt{Infinity} de la norme IEEE~754~\cite{ieee754}. La norme ne fixe ni taille ni précision. La section~\ref{sec:precision} montre pourquoi cela pose problème avec les grands entiers.
+
+\subsubsection{Booléen et \texttt{null}}
+Les booléens s'écrivent \texttt{true} et \texttt{false}, en minuscules. \texttt{null}, aussi en minuscules, indique qu'un champ existe mais n'a pas de valeur. C'est différent d'une clé absente~: \texttt{\{"titre": null\}} dit «~pas de titre~», alors qu'un objet sans clé \texttt{titre} ne dit rien sur le titre.
+
+\subsubsection{Objet (\texttt{object})}
+Un objet est une collection non ordonnée de paires clé-valeur entre accolades. Chaque clé est une chaîne, suivie de deux-points et d'une valeur, et les paires sont séparées par des virgules. L'ordre des clés n'a pas de signification~: JavaScript et Python le conservent à la lecture, mais d'autres outils le changent, comme le type \texttt{jsonb} de PostgreSQL (section~\ref{sec:sql}).
+
+La RFC~8259 recommande que les clés d'un même objet soient uniques, sans l'imposer. Face à une clé en double, certains parseurs gardent la dernière valeur, d'autres la première, d'autres refusent le document. La section~\ref{sec:doublons} montre comment un attaquant exploite ces différences.
+
+\subsubsection{Tableau (\texttt{array})}
+Un tableau est une liste ordonnée de valeurs entre crochets, séparées par des virgules. Les valeurs peuvent être de types différents, y compris des objets et d'autres tableaux.
+
+
+% ==============================================================================
+% JAVASCRIPT
+% ==============================================================================
+\section{JSON en JavaScript et TypeScript}
+\label{sec:js}
+
+\subsection{Sérialiser avec \texttt{JSON.stringify}}
+\texttt{JSON.stringify(valeur, replacer, space)} transforme une valeur JavaScript en texte JSON~\cite{ecma262}. Le deuxième paramètre, \texttt{replacer}, choisit ce qui est sérialisé. Un tableau de noms sert de liste blanche~: seules ces propriétés sont gardées. Une fonction \texttt{(cle, valeur) => ...} est appelée pour chaque propriété, et renvoyer \texttt{undefined} supprime la propriété. Le troisième paramètre, \texttt{space}, règle l'indentation~: un nombre d'espaces entre 1 et 10, ou une chaîne dont les dix premiers caractères servent d'indentation. Sans lui, la sortie est compacte.
+
+\exemple[language=javascript]{js/01_replacer.mjs}{Liste blanche, fonction \texttt{replacer} et indentation}
+
+Pour masquer des données sensibles, une liste blanche est plus sûre qu'une fonction qui retire des champs~: un champ sensible ajouté plus tard au modèle ne sortira pas par accident.
+
+\subsection{Contrôler la forme avec \texttt{toJSON}}
+Si un objet possède une méthode \texttt{toJSON()}, \texttt{JSON.stringify} sérialise la valeur qu'elle renvoie au lieu de l'objet lui-même. \texttt{Date} utilise ce mécanisme~: sa méthode \texttt{toJSON()} appelle \texttt{toISOString()}, ce qui produit des dates au format ISO~8601 en UTC.
+
+\exemple[language=javascript]{js/02_tojson.mjs}{Méthode \texttt{toJSON} d'une classe et d'une date}
+
+\subsection{Les erreurs de sérialisation}
+Deux situations font échouer \texttt{JSON.stringify}. Un \texttt{BigInt} provoque \texttt{TypeError: Do not know how to serialize a BigInt}. Une référence circulaire provoque aussi une \texttt{TypeError}, dont le message dépend du moteur~: \texttt{Converting circular structure to JSON} dans V8 (Node.js, Chrome), \texttt{cyclic object value} dans Firefox. Pour sérialiser malgré tout une structure cyclique, une fonction \texttt{replacer} peut suivre la chaîne des objets parents et remplacer toute valeur qui pointe vers l'un d'eux.
+
+\exemple[language=javascript]{js/03_cycles.mjs}{Remplacer les références circulaires}
+
+La fonction est déclarée avec \texttt{function} et non sous forme de fonction fléchée, car elle a besoin de \texttt{this}, qui désigne l'objet parent de la clé en cours. Une variante courante range tous les objets déjà vus dans un \texttt{WeakSet}. Elle produit des faux positifs~: dans le second appel de l'exemple, l'objet \texttt{x} apparaît deux fois sans former de cycle, et cette variante aurait remplacé \texttt{b} par le marqueur.
+
+\subsection{Lire avec \texttt{JSON.parse}}
+\texttt{JSON.parse(texte, reviver)} construit la valeur JavaScript qui correspond au texte. La fonction \texttt{reviver}, facultative, est appelée pour chaque paire clé-valeur, des valeurs les plus profondes vers la racine, et peut remplacer la valeur. Elle sert surtout à recréer des types que JSON ne connaît pas, comme les dates.
+
+\exemple[language=javascript]{js/04_reviver.mjs}{Recréer des objets \texttt{Date} avec un \texttt{reviver}}
+
+L'expression régulière de l'exemple ne reconnaît que les dates en UTC, avec le suffixe \texttt{Z}. Une date avec décalage horaire, comme \texttt{2026-10-08T23:00:00+01:00}, resterait une chaîne. Convertir toute chaîne qui ressemble à une date est d'ailleurs risqué. Il vaut mieux convertir des champs précis, ou valider avec un schéma (section~\ref{sec:ts}).
+
+\subsection{Gérer les erreurs de lecture}
+\label{sec:erreurs-js}
+\texttt{JSON.parse} lève une \texttt{SyntaxError} dès que le texte n'est pas du JSON valide. Sans \texttt{try}/\texttt{catch}, cette erreur interrompt le programme. En pratique, le cas le plus courant n'est pas un JSON mal écrit, mais une réponse qui n'est pas du JSON du tout~: une page HTML d'erreur renvoyée par un serveur ou un proxy, alors que le code appelle \texttt{reponse.json()}. Le message obtenu, du type \texttt{Unexpected token \textquotesingle{}<\textquotesingle{}}, cache alors la vraie cause. Vérifier le statut HTTP et l'en-tête \texttt{Content-Type} avant de lire le corps donne une erreur claire.
+
+\exemple[language=javascript]{js/05_erreurs_parse.mjs}{Attraper les erreurs de syntaxe et les réponses qui ne sont pas du JSON}
+
+Le test \texttt{type.includes("json")} accepte aussi les types spécialisés comme \texttt{application/problem+json} (section~\ref{sec:rfc9457}).
+
+\subsection{Copier un objet~: JSON ou \texttt{structuredClone}}
+L'aller-retour \texttt{JSON.parse(JSON.stringify(obj))} sert souvent à copier un objet en profondeur. Il perd des informations sans prévenir~: les dates deviennent des chaînes, les \texttt{Map} et \texttt{Set} deviennent des objets vides et les clés de valeur \texttt{undefined} disparaissent. La fonction \texttt{structuredClone}, disponible dans Node.js depuis la version~17 et dans les navigateurs récents, fait une vraie copie et conserve ces types.
+
+\exemple[language=javascript]{js/06_structuredclone.mjs}{Copie par JSON et copie par \texttt{structuredClone}}
+
+\texttt{structuredClone} a lui aussi des limites. Il lève une erreur sur les fonctions, et une instance de classe devient un objet simple, sans ses méthodes. Dans ces cas, il faut écrire une méthode de copie dans la classe.
+
+\subsection{Typer et valider en TypeScript}
+\label{sec:ts}
+En TypeScript, \texttt{JSON.parse} renvoie le type \texttt{any}, qui désactive toute vérification. Un type récursif décrit exactement l'ensemble des valeurs JSON~:
+
+\exemple[language=javascript]{js/07_types_json.ts}{Type récursif d'une valeur JSON}
+
+Ce type décrit la forme générale d'un JSON, pas le contenu attendu. Écrire \texttt{JSON.parse(texte) as Utilisateur} ne vérifie rien~: le compilateur fait confiance, et une donnée mal formée circule jusqu'à ce qu'un champ manquant fasse échouer le code ailleurs. Les données externes doivent être validées à l'exécution. Avec Zod, le même schéma sert à valider et à déduire le type TypeScript.
+
+\exemple[language=javascript]{js/08_zod.ts}{Validation à l'exécution avec Zod 4}
+
+\texttt{parse} lève une erreur si les données sont invalides, alors que \texttt{safeParse} renvoie un objet qui contient soit les données, soit la liste des problèmes. Ce code suit la syntaxe de Zod~4. En Zod~3, on écrivait \texttt{z.string().email()} et \texttt{z.string().datetime()}, des formes encore acceptées mais dépréciées.
+
+% ==============================================================================
+% PYTHON
+% ==============================================================================
+\section{JSON en Python}
+\label{sec:python}
+
+\subsection{Le module \texttt{json}}
+Le module \texttt{json} fait partie de la bibliothèque standard depuis Python~2.6. Il propose deux paires de fonctions~: \texttt{dumps} et \texttt{loads} travaillent sur des chaînes, \texttt{dump} et \texttt{load} sur des fichiers. Le tableau~\ref{tab:python} donne les correspondances de types.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llcll}
+\toprule
+\multicolumn{2}{c}{\textbf{Lecture (JSON vers Python)}} & & \multicolumn{2}{c}{\textbf{Écriture (Python vers JSON)}} \\
+\cmidrule{1-2}\cmidrule{4-5}
+\texttt{object} & \texttt{dict} & & \texttt{dict} & \texttt{object} \\
+\texttt{array} & \texttt{list} & & \texttt{list}, \texttt{tuple} & \texttt{array} \\
+\texttt{string} & \texttt{str} & & \texttt{str} & \texttt{string} \\
+\texttt{number} entier & \texttt{int} & & \texttt{int} & \texttt{number} \\
+\texttt{number} décimal & \texttt{float} & & \texttt{float} & \texttt{number} \\
+\texttt{true}, \texttt{false} & \texttt{True}, \texttt{False} & & \texttt{True}, \texttt{False} & \texttt{true}, \texttt{false} \\
+\texttt{null} & \texttt{None} & & \texttt{None} & \texttt{null} \\
+\bottomrule
+\end{tabular}
+\caption{Correspondance des types entre JSON et Python.}
+\label{tab:python}
+\end{table}
+
+Deux conversions surprennent. Un tuple devient un tableau et revient sous forme de liste à la lecture. Les clés d'un dictionnaire sont converties en chaînes~: \texttt{\{1: "a"\}} devient \texttt{\{"1": "a"\}}, et la relecture ne rend pas l'entier d'origine.
+
+\subsection{Les paramètres de \texttt{json.dumps}}
+\exemple[language=python]{python/01_dumps.py}{Paramètres principaux de \texttt{json.dumps}}
+
+\texttt{ensure\_ascii} vaut \texttt{True} par défaut et remplace chaque caractère non ASCII par une séquence \texttt{\textbackslash uXXXX}. Avec \texttt{False}, le texte garde ses accents et devient plus léger~: en UTF-8, \texttt{é} occupe 2~octets, contre 6 pour \texttt{\textbackslash u00e9}.
+
+\texttt{separators} vaut \texttt{(\textquotesingle{}, \textquotesingle{}, \textquotesingle{}: \textquotesingle{})} sans indentation et \texttt{(\textquotesingle{},\textquotesingle{}, \textquotesingle{}: \textquotesingle{})} avec indentation. La valeur \texttt{(\textquotesingle{},\textquotesingle{}, \textquotesingle{}:\textquotesingle{})} supprime tous les espaces.
+
+\texttt{sort\_keys=True} trie les clés, ce qui rend la sortie stable, par exemple pour comparer deux fichiers. Le tri ne suffit pas à produire une forme canonique pour une signature numérique~: l'écriture des nombres et l'échappement des caractères doivent aussi être fixés, ce que définit la RFC~8785~\cite{rundgren2020rfc8785}.
+
+\texttt{allow\_nan} vaut \texttt{True} par défaut. Python écrit alors \texttt{NaN} ou \texttt{Infinity}, que la grammaire JSON interdit et que \texttt{JSON.parse} refuse en JavaScript. Avec \texttt{allow\_nan=False}, Python lève une \texttt{ValueError}. À la lecture, \texttt{json.loads} accepte ces valeurs par défaut, et le paramètre \texttt{parse\_constant} permet de les refuser.
+
+\warningbox{Fichiers sous Windows}{Ouvrez toujours les fichiers JSON avec \texttt{encoding=\textquotedbl utf-8\textquotedbl}. Sans ce paramètre, Python utilise l'encodage par défaut du système, souvent cp1252 sous Windows, et un \texttt{json.dump} avec \texttt{ensure\_ascii=False} peut échouer sur certains caractères ou produire un fichier mal lu ailleurs.}
+
+\subsection{Gérer les erreurs de lecture}
+\texttt{json.loads} et \texttt{json.load} lèvent \texttt{json.JSONDecodeError} quand le texte est invalide. Cette exception hérite de \texttt{ValueError} et donne la position de l'erreur dans ses attributs \texttt{lineno}, \texttt{colno} et \texttt{msg}.
+
+\exemple[language=python]{python/02_erreurs.py}{Localiser une erreur de syntaxe}
+
+Avec Python~3.13, ce script affiche \texttt{Ligne 3, colonne 12 : Illegal trailing comma before end of object}. Les versions précédentes donnent un message moins précis pour la même erreur.
+
+Un cas fréquent sous Windows~: un fichier enregistré par Windows PowerShell~5.1 avec \texttt{-Encoding UTF8} commence par un BOM, et Python refuse de le lire avec le message \texttt{Unexpected UTF-8 BOM (decode using utf-8-sig)}. Ouvrir le fichier avec \texttt{encoding=\textquotedbl utf-8-sig\textquotedbl} retire le BOM s'il est présent.
+
+\subsection{Types non pris en charge}
+Les dates, les \texttt{UUID}, les \texttt{Decimal} et les énumérations font échouer \texttt{json.dumps} avec une \texttt{TypeError}. Une sous-classe de \texttt{json.JSONEncoder} dont la méthode \texttt{default} convertit ces types règle le problème.
+
+\exemple[language=python]{python/03_encodeur.py}{Encodeur pour les dates, UUID, \texttt{Decimal} et énumérations}
+
+Le \texttt{Decimal} devient une chaîne et non un \texttt{float}, qui réintroduirait les erreurs d'arrondi que \texttt{Decimal} sert à éviter (section~\ref{sec:precision}). Pour la lecture, le paramètre \texttt{object\_hook} reçoit chaque objet décodé sous forme de dictionnaire et peut le remplacer, par exemple par une instance de classe.
+
+\exemple[language=python]{python/04_object_hook.py}{Recréer une dataclass avec \texttt{object\_hook}}
+
+\subsection{Valider avec Pydantic}
+Pydantic~2 valide et convertit les données à partir de classes annotées. Son cœur, \texttt{pydantic-core}, est écrit en Rust. \texttt{model\_validate\_json} analyse et valide le texte en une seule étape, et \texttt{model\_dump\_json} produit le JSON. C'est la bibliothèque sur laquelle repose FastAPI.
+
+\exemple[language=python]{python/05_pydantic.py}{Validation avec Pydantic 2}
+
+Le type \texttt{EmailStr} nécessite le paquet \texttt{email-validator}, installé avec \texttt{pip install \textquotedbl pydantic[email]\textquotedbl}.
+
+\subsection{Bibliothèques plus rapides}
+Pour de gros volumes, deux bibliothèques compilées remplacent le module standard. \textbf{orjson}, écrite en Rust, sérialise directement les dates, les UUID et les dataclasses, ainsi que les tableaux \texttt{numpy} avec l'option \texttt{OPT\_SERIALIZE\_NUMPY}. Attention~: \texttt{orjson.dumps} renvoie des \texttt{bytes}, pas une \texttt{str}. \textbf{msgspec} décode et valide en une seule passe vers des classes typées (\texttt{msgspec.Struct}). Leurs auteurs publient des mesures de performance, mais le gain réel dépend de vos données~: mesurez-le avec le module \texttt{timeit} avant de changer de bibliothèque.
+
+% ==============================================================================
+% JSON SCHEMA
+% ==============================================================================
+\section{Valider avec JSON Schema}
+\label{sec:schema}
+
+\subsection{Rôle}
+La grammaire JSON ne dit rien du contenu attendu~: n'importe quel objet est valide. JSON Schema décrit ce contenu (champs obligatoires, types, formats, bornes) dans un document qui est lui-même du JSON. La version actuelle, le draft 2020-12~\cite{jsonschema202012}, est publiée par le projet json-schema.org. OpenAPI, le format le plus répandu pour décrire les API REST, utilise JSON Schema pour décrire les corps de requête et de réponse. Depuis OpenAPI~3.1, les deux sont entièrement compatibles.
+
+\subsection{Un schéma complet}
+\exemple[language=json]{json/produit.schema.json}{Schéma d'un produit (draft 2020-12)}
+
+\texttt{\$schema} indique la version de la spécification, et \texttt{\$id} donne au schéma une adresse qui permet de le référencer. \texttt{required} liste les champs obligatoires. \texttt{pattern} impose une expression régulière et \texttt{exclusiveMinimum} une borne stricte. \texttt{"additionalProperties": false} refuse tout champ non déclaré. Cette dernière règle protège contre l'affectation de masse (\textit{mass assignment})~: un client qui ajoute \texttt{"role": "admin"} à sa requête est rejeté, au lieu de voir ce champ recopié en base.
+
+\warningbox{Le mot-clé format n'est pas vérifié par défaut}{En draft 2020-12, \texttt{format} est une simple annotation. Il faut activer sa vérification~: avec le paquet \texttt{ajv-formats} pour AJV, avec \texttt{FORMAT\_CHECKER} pour la bibliothèque Python \texttt{jsonschema}. En Python, le format \texttt{date-time} exige en plus le paquet \texttt{rfc3339-validator}. Sans lui, la vérification est ignorée sans aucun message.}
+
+\subsection{Combiner et réutiliser}
+\texttt{allOf} exige que la valeur respecte tous les sous-schémas, \texttt{anyOf} au moins un, \texttt{oneOf} exactement un, et \texttt{not} refuse les valeurs qui respectent le sous-schéma. Les définitions réutilisables se placent dans \texttt{\$defs} et s'utilisent avec \texttt{"\$ref": "\#/\$defs/Adresse"}.
+
+\subsection{Valider en Python et en JavaScript}
+En Python, la bibliothèque \texttt{jsonschema} fournit un validateur par version de la spécification. \texttt{iter\_errors} liste toutes les erreurs au lieu de s'arrêter à la première.
+
+\exemple[language=python]{python/06_jsonschema.py}{Validation avec \texttt{jsonschema}}
+
+En JavaScript, AJV compile chaque schéma en une fonction de validation. Attention à l'import~: la classe par défaut \texttt{Ajv} cible le draft-07, et un schéma qui déclare le draft 2020-12 exige la classe \texttt{Ajv2020}.
+
+\exemple[language=javascript]{js/10_ajv.mjs}{Validation avec AJV et \texttt{ajv-formats}}
+
+\subsection{Générer le schéma depuis le code}
+Écrire un schéma à la main en plus des classes crée deux sources à garder synchronisées. Zod~4 et Pydantic produisent le schéma à partir du modèle~: \texttt{z.toJSONSchema(schema)} d'un côté, \texttt{Modele.model\_json\_schema()} de l'autre (code~\ref{code:llm}).
+
+\exemple[language=javascript]{js/09_zod_vers_schema.ts}{JSON Schema généré par Zod 4}
+
+\subsection{Contraindre la réponse d'un modèle de langage}
+Les modèles de langage servent de plus en plus à extraire des données structurées d'un texte~: une facture, un formulaire, un courriel. Plusieurs API acceptent un JSON Schema pour contraindre la forme de la réponse. Ollama, qui fait tourner gratuitement des modèles sur votre propre machine, le prend en charge depuis sa version~0.5 avec le champ \texttt{format}. Les API d'OpenAI et d'Anthropic proposent aussi des sorties structurées, chacune avec ses restrictions sur les mots-clés acceptés.
+
+\exemple[language=python,label=code:llm]{python/09_schema_llm.py}{Schéma généré par Pydantic pour une extraction de données}
+
+Même contrainte par un schéma, la réponse doit être validée. Elle peut être tronquée si la limite de longueur est atteinte, et un champ peut avoir la bonne forme mais une valeur fausse. Le même modèle Pydantic sert à générer le schéma et à valider la réponse.
+
+% ==============================================================================
+% FORMATS DERIVES
+% ==============================================================================
+\section{Formats et standards dérivés}
+\label{sec:derives}
+
+\subsection{JSON Pointer (RFC 6901)}
+JSON Pointer~\cite{bryan2013rfc6901} désigne une valeur précise d'un document par un chemin de segments séparés par \texttt{/}. Les indices de tableau commencent à 0. Dans les noms de clés, \texttt{\textasciitilde} s'écrit \texttt{\textasciitilde 0} et \texttt{/} s'écrit \texttt{\textasciitilde 1}.
+
+\exemple[language=json]{json/contacts.json}{Document utilisé pour les exemples de JSON Pointer}
+
+Dans ce document, \texttt{/utilisateurs/0/nom} désigne \texttt{"Alice"}, et \nolinkurl{/utilisateurs/0/contacts/email~1pro} désigne l'adresse associée à la clé \texttt{"email/pro"}. JSON Patch et le mot-clé \texttt{\$ref} de JSON Schema utilisent cette syntaxe.
+
+\subsection{JSON Patch (RFC 6902) et JSON Merge Patch (RFC 7396)}
+Ces deux formats décrivent une modification partielle, généralement envoyée avec la méthode HTTP \texttt{PATCH}. JSON Patch~\cite{bryan2013rfc6902} est une liste d'opérations appliquées dans l'ordre~: \texttt{add}, \texttt{remove}, \texttt{replace}, \texttt{move}, \texttt{copy} et \texttt{test}. L'application est atomique~: si une opération échoue, le document reste inchangé. L'opération \texttt{test} sert de garde-fou, par exemple pour ne valider une commande que si elle est encore en attente.
+
+\exemple[language=json]{json/commande.json}{Document de départ}
+
+\exemple[language=json]{json/commande.patch.json}{JSON Patch appliqué au document}
+
+Ce patch produit \texttt{\{"statut": "validee", "montant": 15000, "validePar": "Administrateur"\}}. Si le statut n'est plus \texttt{"en\_attente"}, l'opération \texttt{test} échoue et rien n'est modifié.
+
+JSON Merge Patch~\cite{hoffman2014rfc7396} est plus simple~: on envoie un objet qui contient seulement les champs à changer, et \texttt{null} supprime un champ. Le patch \texttt{\{"statut": "validee", "brouillon": null\}} produit le même effet que l'exemple précédent, sans l'ajout de \texttt{validePar}. Ce format a deux limites~: un tableau est toujours remplacé en entier, et il est impossible de donner la valeur \texttt{null} à un champ.
+
+\subsection{JSONPath (RFC 9535)}
+JSONPath sélectionne des valeurs dans un document avec une syntaxe proche de XPath. Proposé par Stefan Gössner en 2007, longtemps implémenté de façon incohérente, il est normalisé depuis février 2024 par la RFC~9535~\cite{gossner2024rfc9535}. \texttt{\$} désigne la racine, \texttt{..} cherche à toutes les profondeurs, \texttt{[*]} prend tous les éléments et \texttt{[?...]} filtre, avec \texttt{@} pour l'élément en cours. Appliquées au fichier \texttt{json/utilisateurs.json}, ces requêtes donnent~:
+
+\begin{lstlisting}[caption={Requêtes JSONPath}]
+$.utilisateurs[*].nom                       tous les noms
+$..nom                                      toutes les cles "nom", a toute profondeur
+$.utilisateurs[?@.statut == 'actif'].nom    noms des comptes actifs
+$.utilisateurs[0]                           premier utilisateur
+\end{lstlisting}
+
+L'outil \texttt{jq} (section~\ref{sec:outils}) utilise une autre syntaxe mais couvre les mêmes besoins en ligne de commande.
+
+\subsection{JSON Lines}
+\label{sec:jsonl}
+JSON Lines (extension \texttt{.jsonl}, aussi appelé NDJSON) place un document JSON complet par ligne. Un tableau JSON de plusieurs gigaoctets n'est valide qu'une fois son crochet fermant lu, alors qu'un fichier JSON Lines se traite ligne par ligne, avec une mémoire constante. On ajoute un enregistrement en écrivant une ligne à la fin du fichier, sans le relire, et un fichier coupé en morceaux reste exploitable. C'est le format courant des journaux applicatifs, des exports de données et des jeux de données d'entraînement et d'évaluation en apprentissage automatique.
+
+\exemple[language=json]{json/mesures.jsonl}{Fichier JSON Lines}
+
+\exemple[language=python]{python/08_jsonl.py}{Lire un fichier JSON Lines en Python et avec pandas}
+
+\subsection{JSON-LD et JWT}
+JSON-LD~\cite{kellogg2020jsonld} ajoute du sens aux données avec les clés \texttt{@context}, \texttt{@id} et \texttt{@type}, qui relient chaque propriété à un vocabulaire partagé. Son usage principal est le référencement~: les moteurs de recherche lisent le vocabulaire Schema.org écrit en JSON-LD dans les pages web.
+
+Un JSON Web Token (JWT, RFC~7519~\cite{jones2015rfc7519}) est formé de trois segments encodés en Base64URL et séparés par des points~: un en-tête et une charge utile en JSON, puis une signature. Encodé ne veut pas dire chiffré~: n'importe qui peut lire la charge utile, sans clé.
+
+\exemple[language=python]{python/10_jwt.py}{Lire la charge utile d'un JWT sans aucune clé}
+
+Deux règles en découlent. Ne placez jamais de secret dans la charge utile d'un JWT signé. Et vérifiez toujours la signature côté serveur avec une bibliothèque reconnue (PyJWT en Python, \texttt{jose} en JavaScript) en fixant la liste des algorithmes acceptés~: un serveur qui se fie à l'algorithme annoncé dans l'en-tête, y compris \texttt{none}, accepte des jetons forgés. La RFC~8725~\cite{sheffer2020rfc8725} rassemble ces bonnes pratiques.
+
+% ==============================================================================
+% POSTGRESQL
+% ==============================================================================
+\section{Stocker du JSON dans PostgreSQL}
+\label{sec:sql}
+
+\subsection{\texttt{json} ou \texttt{jsonb}}
+PostgreSQL propose deux types. \texttt{json} stocke le texte tel quel~: espaces, ordre des clés et clés en double sont conservés, et le texte est réanalysé à chaque requête. \texttt{jsonb} stocke une forme binaire décomposée~: l'écriture est un peu plus lente, mais les requêtes sont plus rapides et le type s'indexe. En contrepartie, \texttt{jsonb} normalise le document~: il supprime les espaces, réordonne les clés et ne garde que la dernière valeur d'une clé en double. Sauf besoin de conserver le texte exact, pour archiver une charge utile signée par exemple, choisissez \texttt{jsonb}.
+
+\subsection{Requêtes essentielles}
+Le tableau~\ref{tab:operateurs} résume les opérateurs utiles, et le code~\ref{code:sql} les met en pratique.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Opérateur} & \textbf{Rôle} & \textbf{Exemple} \\
+\midrule
+\texttt{->} & Valeur d'une clé ou d'un indice, en \texttt{jsonb} & \texttt{details -> \textquotesingle{}livraison\textquotesingle{}} \\
+\texttt{->{}>} & Même valeur, convertie en \texttt{text} & \texttt{details ->{}> \textquotesingle{}express\textquotesingle{}} \\
+\texttt{\#>}, \texttt{\#>{}>} & Valeur au bout d'un chemin & \texttt{details \#>{}> \textquotesingle{}\{livraison,ville\}\textquotesingle{}} \\
+\texttt{@>} & Le document contient-il ce fragment~? & \texttt{details @> \textquotesingle{}\{"express": true\}\textquotesingle{}} \\
+\texttt{?} & La clé existe-t-elle~? & \texttt{details ? \textquotesingle{}express\textquotesingle{}} \\
+\texttt{jsonb\_set} & Remplace la valeur d'un chemin & voir le code~\ref{code:sql} \\
+\bottomrule
+\end{tabularx}
+\caption{Opérateurs et fonctions \texttt{jsonb} courants.}
+\label{tab:operateurs}
+\end{table}
+
+\exemple[style=sql,label=code:sql]{sql/jsonb.sql}{Créer, interroger, indexer et modifier une colonne \texttt{jsonb}}
+
+La première requête renvoie \texttt{Libreville} et \texttt{Douala} avec le nombre d'articles, la deuxième seulement \texttt{Ada}, et la dernière montre la normalisation~: \texttt{\{"b": 1, "a": 2, "a": 3\}} pour \texttt{json}, \texttt{\{"a": 3, "b": 1\}} pour \texttt{jsonb}.
+
+
+L'index GIN créé dans l'exemple accélère \texttt{@>} et \texttt{?}. Sans index, PostgreSQL doit lire chaque ligne et analyser chaque document.
+
+\subsection{Quand utiliser \texttt{jsonb}}
+\texttt{jsonb} convient aux données dont la forme varie~: attributs différents selon le type de produit, préférences d'un utilisateur, charge utile brute d'un webhook conservée pour audit. Les champs que vous filtrez, joignez ou contraignez souvent doivent rester des colonnes classiques~: une colonne a un type vérifié, accepte une clé étrangère et dispose de statistiques que l'optimiseur de requêtes utilise. Un compromis courant consiste à extraire en colonnes les quelques champs importants et à garder le reste en \texttt{jsonb}.
+
+Supabase repose sur PostgreSQL, tout ce qui précède s'y applique donc. Son client JavaScript accepte la même notation dans les filtres, par exemple \nolinkurl{.eq("details->livraison->>ville", "Libreville")}, et l'extension \texttt{pg\_jsonschema} permet de valider une colonne contre un JSON Schema dans une contrainte \texttt{CHECK}.
+
+% ==============================================================================
+% PERFORMANCE
+% ==============================================================================
+\section{Gros volumes et performance}
+\label{sec:perf}
+
+\subsection{Le coût d'un chargement complet}
+\texttt{JSON.parse} et \texttt{json.load} lisent tout le texte, puis construisent tous les objets en mémoire. L'arbre obtenu occupe en général plusieurs fois la taille du fichier, à cause des tables de hachage des dictionnaires, des pointeurs et des en-têtes de chaque objet. Le facteur dépend du langage et des données, et se mesure, par exemple avec le module \texttt{tracemalloc} en Python. Sur un serveur ou un conteneur dont la mémoire est limitée, un fichier de quelques centaines de mégaoctets peut suffire à faire arrêter le processus pour dépassement de mémoire.
+
+\subsection{Lire par flux}
+Un parseur par flux lit le texte morceau par morceau et rend les éléments un à un, sans construire l'arbre complet. En Python, \texttt{ijson} renvoie les éléments d'un tableau désigné par un préfixe~: \texttt{"utilisateurs.item"} désigne chaque élément du tableau \texttt{utilisateurs}.
+
+\exemple[language=python]{python/07_ijson.py}{Compter des éléments sans charger tout le fichier}
+
+La mémoire utilisée dépend alors de la taille d'un élément, pas de celle du fichier. En Node.js, le paquet \texttt{stream-json} joue le même rôle avec les flux. Quand vous choisissez le format, JSON Lines (section~\ref{sec:jsonl}) évite le problème à la source.
+
+\subsection{Compression}
+Les noms de clés se répètent à chaque enregistrement, ce qui rend JSON très compressible. Activer la compression HTTP (Gzip ou Brotli) sur le serveur réduit fortement la taille transférée, et Brotli compresse en général mieux que Gzip sur du texte. La minification, qui supprime les espaces, réduit aussi la taille brute, mais son gain devient faible une fois la compression activée. Dans les deux cas, mesurez sur vos propres réponses.
+
+% ==============================================================================
+% SECURITE
+% ==============================================================================
+\section{Sécurité}
+\label{sec:securite}
+
+\subsection{Imbrication profonde et documents géants}
+Un document de quelques dizaines de kilo-octets peut contenir des dizaines de milliers de crochets imbriqués. Un parseur récursif consomme de la pile d'appels à chaque niveau, jusqu'à l'épuiser. En Python, \texttt{json.loads} lève alors une \texttt{RecursionError}~; selon le langage, le résultat va de l'exception au plantage du processus. Un document simplement énorme, lui, sature la mémoire.
+
+\warningbox{Deux limites à fixer}{Limitez la taille du corps des requêtes, en l'adaptant à votre API~: Express, par exemple, refuse par défaut les corps JSON de plus de 100~ko. Limitez aussi la profondeur d'imbrication acceptée~: 64~niveaux est une valeur courante, c'est celle de \texttt{System.Text.Json} en .NET.}
+
+\subsection{Les grands entiers}
+\label{sec:precision}
+JavaScript représente tous les nombres en double précision IEEE~754~\cite{ieee754}, avec 53~bits de précision. Les entiers ne sont exacts que dans l'intervalle
+\begin{equation}
+[-(2^{53}-1),\; 2^{53}-1], \qquad 2^{53}-1 = 9\,007\,199\,254\,740\,991.
+\end{equation}
+La RFC~8259 (section~6) cite elle-même cet intervalle comme celui sur lequel les implémentations s'accordent. Au-delà, \texttt{JSON.parse} arrondit sans prévenir. C'est le cas des clés \texttt{BIGINT} des bases de données et des identifiants distribués de type Snowflake, utilisés par exemple par Twitter et Discord.
+
+\exemple[language=javascript]{js/11_precision.mjs}{Un identifiant faussé par \texttt{JSON.parse}}
+
+\takeaway{Règle}{Envoyez les identifiants et les entiers sur 64~bits sous forme de chaînes. Côté JavaScript, convertissez-les avec \texttt{BigInt} seulement si un calcul est nécessaire.}
+
+\subsection{Clés dupliquées}
+\label{sec:doublons}
+La RFC~8259 n'impose pas de rejeter les clés en double. Prenons \texttt{\{"role": "lecteur", "role": "admin"\}}. Si un pare-feu applicatif garde la première valeur et laisse passer la requête, et que le serveur placé derrière lui garde la dernière, l'attaquant obtient le rôle \texttt{admin} sans que le contrôle l'ait vu. \texttt{JSON.parse}, \texttt{json.loads} et \texttt{jsonb} gardent tous la dernière valeur. La RFC~7493 (I-JSON)~\cite{bray2015rfc7493} interdit les doublons~: c'est le comportement à exiger des composants qui contrôlent l'accès. En Python, le paramètre \texttt{object\_pairs\_hook} permet de les refuser.
+
+\exemple[language=python]{python/11_doublons.py}{Refuser les clés dupliquées en Python}
+
+\subsection{Pollution de prototype en JavaScript}
+\texttt{JSON.parse} crée la clé \texttt{\_\_proto\_\_} comme une propriété ordinaire~: le parseur lui-même ne pollue rien. Le danger vient d'une fonction de fusion récursive qui recopie ensuite cette clé dans un objet existant. Elle modifie alors le prototype commun à tous les objets, et une propriété comme \texttt{admin} apparaît sur chacun d'eux.
+
+\exemple[language=javascript]{js/12_pollution.mjs}{Fusion récursive avec et sans protection}
+
+Pour s'en protéger, les fonctions de fusion doivent ignorer \texttt{\_\_proto\_\_}, \texttt{constructor} et \texttt{prototype}. Une \texttt{Map} ou un objet créé avec \texttt{Object.create(null)} n'a pas de prototype à polluer, et un schéma qui refuse les champs inconnus bloque ces clés dès l'entrée.
+
+\subsection{Format des erreurs d'API (RFC 9457)}
+\label{sec:rfc9457}
+La RFC~9457~\cite{nottingham2023rfc9457}, qui remplace depuis 2023 la RFC~7807~\cite{nottingham2016rfc7807}, définit un format standard pour décrire une erreur d'API, avec le type de média \texttt{application/problem+json}. \texttt{type} identifie le genre d'erreur par une URI, \texttt{title} le résume, \texttt{status} reprend le code HTTP, \texttt{detail} explique ce cas précis et \texttt{instance} désigne la ressource concernée.
+
+\exemple[language=json]{json/probleme.json}{Erreur d'API au format RFC 9457}
+
+% ==============================================================================
+% CHOISIR UN FORMAT
+% ==============================================================================
+\section{Choisir un format}
+\label{sec:formats}
+
+\subsection{Comparaison}
+Le tableau~\ref{tab:formats} compare JSON à quatre autres formats sur des critères vérifiables. Le chapitre~4 de \textit{Designing Data-Intensive Applications}~\cite{kleppmann2017designing} discute en détail les compromis entre formats textuels et binaires, ainsi que l'évolution des schémas.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{lXXXXX}
+\toprule
+& \textbf{JSON} & \textbf{YAML} & \textbf{XML} & \textbf{Protobuf} & \textbf{MessagePack} \\
+\midrule
+Encodage & Texte & Texte & Texte & Binaire & Binaire \\
+Lisible sans outil & Oui & Oui & Oui & Non & Non \\
+Commentaires & Non & Oui & Oui & Non\textsuperscript{a} & Non \\
+Schéma & Facultatif (JSON Schema) & Facultatif & Facultatif (XSD) & Obligatoire (\texttt{.proto}) & Facultatif \\
+Données binaires & En Base64 & En Base64 & En Base64 & Natives & Natives \\
+\bottomrule
+\end{tabularx}
+\caption{Comparaison de formats d'échange. \textsuperscript{a}~Les commentaires vont dans le fichier \texttt{.proto}, pas dans les données.}
+\label{tab:formats}
+\end{table}
+
+\subsection{Recommandations}
+JSON reste le bon choix par défaut pour les API publiques et les échanges avec un navigateur. Pour un fichier de configuration écrit à la main, YAML ou une variante tolérante de JSON comme JSONC (avec commentaires, utilisée par VS Code) ou JSON5 sont plus confortables. Pour des échanges internes à fort débit entre services, Protocol Buffers avec gRPC réduit la taille des messages et impose un contrat. Pour réduire la taille sans changer la structure des données, MessagePack ou CBOR (RFC~8949) encodent en binaire un modèle de données proche de celui de JSON.
+
+% ==============================================================================
+% OUTILS
+% ==============================================================================
+\section{Outils en ligne de commande}
+\label{sec:outils}
+
+\subsection{jq}
+\texttt{jq} lit, filtre et transforme du JSON dans un terminal. Sous Windows, il s'installe avec \texttt{winget install jqlang.jq}. Les commandes suivantes se lancent depuis le dossier \texttt{exemples/}, et les tests vérifient leurs résultats.
+
+\begin{lstlisting}[caption={Commandes jq courantes}]
+jq . json/utilisateur.json                  # formate le document
+jq .profil.prenom json/utilisateur.json     # "Ada"
+jq -r '.roles[]' json/utilisateur.json      # une valeur par ligne, sans guillemets
+jq -c .coordonnees json/utilisateur.json    # sortie compacte sur une ligne
+jq -s length json/mesures.jsonl             # -s regroupe les lignes : 4
+jq '.utilisateurs[] | select(.statut == "actif") | .nom' json/utilisateurs.json
+\end{lstlisting}
+
+Windows PowerShell~5.1 supprime les guillemets doubles placés à l'intérieur d'un argument quand il appelle un programme externe. La dernière commande ne fonctionne donc qu'avec PowerShell~7.3 ou plus récent. Avec la version~5.1, écrivez le filtre dans un fichier et passez-le avec \texttt{jq -f filtre.jq}.
+
+\subsection{Valider un fichier avec Python}
+\texttt{python -m json.tool fichier.json} valide un fichier et l'affiche formaté, sans rien installer. En cas d'erreur, la commande indique la ligne et la colonne. L'option \texttt{-{}-sort-keys} trie les clés, \texttt{-{}-compact} compacte la sortie et \texttt{-{}-json-lines} traite un fichier JSON Lines.
+
+\subsection{PowerShell}
+PowerShell convertit le JSON en objets avec \texttt{ConvertFrom-Json}, et des objets en JSON avec \texttt{ConvertTo-Json}. L'option \texttt{-Raw} de \texttt{Get-Content} lit le fichier en une seule chaîne.
+
+\begin{lstlisting}[caption={Lire et écrire du JSON en PowerShell}]
+$u = Get-Content .\json\utilisateur.json -Raw | ConvertFrom-Json
+$u.profil.prenom              # Ada
+$u.roles -join ", "           # chercheuse, pionniere, admin
+$u | ConvertTo-Json -Depth 10 | Set-Content sortie.json -Encoding utf8
+\end{lstlisting}
+
+\texttt{ConvertTo-Json} s'arrête par défaut à une profondeur de~2 et remplace les niveaux plus profonds par leur représentation textuelle, comme \texttt{"System.Collections.Hashtable"}~: précisez toujours \texttt{-Depth}. Windows PowerShell~5.1 ajoute aussi un BOM avec \texttt{-Encoding UTF8}, que la RFC~8259 interdit et que Python refuse~; PowerShell~7 écrit de l'UTF-8 sans BOM.
+
+% ==============================================================================
+% CONCLUSION
+% ==============================================================================
+\section{Conclusion}
+JSON est simple à écrire, et la plupart des problèmes viennent de ce que sa grammaire ne dit pas~: la précision des nombres, les clés en double, la forme attendue des données, la taille des documents.
+
+Quelques règles couvrent l'essentiel. Validez toute donnée qui entre dans votre programme avec un schéma, en Python comme en TypeScript, et générez ce schéma à partir du modèle plutôt que de l'écrire deux fois. Envoyez les identifiants et les entiers sur 64~bits sous forme de chaînes. Refusez les clés dupliquées dans les composants qui contrôlent l'accès, et limitez la taille et la profondeur des documents reçus. Traitez explicitement les erreurs de lecture, en vérifiant le type de contenu avant d'appeler \texttt{.json()}. Pour les gros volumes, préférez JSON Lines et la lecture par flux. En base de données, utilisez \texttt{jsonb} pour les données de forme variable et gardez en colonnes les champs que vous interrogez souvent.
+
+Pour aller plus loin, la RFC~8259 reste la référence, courte et lisible. Le guide \textit{Understanding JSON Schema}, sur json-schema.org, explique les schémas pas à pas. Enfin, chaque exemple de ce manuel peut être modifié puis relancé avec sa suite de tests, ce qui permet de vérifier rapidement une hypothèse.
+
+% ==============================================================================
+% FICHE DE REFERENCE
+% ==============================================================================
+\section{Fiche de référence}
+\label{sec:fiche}
+
+\subsection{Règles de syntaxe}
+Les clés sont entre guillemets doubles droits. Pas de virgule après le dernier élément, pas de commentaire. \texttt{true}, \texttt{false} et \texttt{null} s'écrivent en minuscules. Pas de zéro en tête, pas de signe plus, pas de \texttt{NaN} ni d'\texttt{Infinity}. Le texte échangé est en UTF-8, sans BOM. Recommandé par les RFC~8259 et~7493~: des clés uniques, et les entiers au-delà de $2^{53}-1$ envoyés sous forme de chaînes. Les tableaux~\ref{tab:echappements} à~\ref{tab:media} rassemblent les séquences d'échappement, les fonctions équivalentes en JavaScript et en Python, et les types de média.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{lll}
+\toprule
+\textbf{Séquence} & \textbf{Caractère} & \textbf{Code} \\
+\midrule
+\texttt{\textbackslash"} & Guillemet double & U+0022 \\
+\texttt{\textbackslash\textbackslash} & Barre oblique inversée & U+005C \\
+\texttt{\textbackslash/} & Barre oblique (échappement facultatif) & U+002F \\
+\texttt{\textbackslash b} & Retour arrière & U+0008 \\
+\texttt{\textbackslash f} & Saut de page & U+000C \\
+\texttt{\textbackslash n} & Saut de ligne & U+000A \\
+\texttt{\textbackslash r} & Retour chariot & U+000D \\
+\texttt{\textbackslash t} & Tabulation & U+0009 \\
+\texttt{\textbackslash uXXXX} & Caractère désigné par son code UTF-16 & U+XXXX \\
+\bottomrule
+\end{tabular}
+\caption{Séquences d'échappement autorisées dans une chaîne JSON.}
+\label{tab:echappements}
+\end{table}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\textbf{Opération} & \textbf{JavaScript} & \textbf{Python} \\
+\midrule
+Texte vers valeur & \texttt{JSON.parse(texte)} & \texttt{json.loads(texte)} \\
+Fichier vers valeur & \texttt{JSON.parse(}\allowbreak\texttt{fs.readFileSync(f, "utf8"))} & \texttt{json.load(f)} \\
+Valeur vers texte & \texttt{JSON.stringify(v)} & \texttt{json.dumps(v)} \\
+Valeur vers fichier & \texttt{fs.writeFileSync(}\allowbreak\texttt{f, JSON.stringify(v))} & \texttt{json.dump(v, f)} \\
+Indenter & \texttt{JSON.stringify(v, null, 2)} & \texttt{json.dumps(v, indent=2)} \\
+Garder les accents & Par défaut & \texttt{ensure\_ascii=False} \\
+Trier les clés & À programmer & \texttt{sort\_keys=True} \\
+Erreur de lecture & \texttt{SyntaxError} & \texttt{json.JSONDecodeError} \\
+Valider & Zod, AJV & Pydantic, \texttt{jsonschema} \\
+\bottomrule
+\end{tabularx}
+\caption{Fonctions équivalentes en JavaScript et en Python.}
+\label{tab:memento}
+\end{table}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Type} & \textbf{Usage} \\
+\midrule
+\texttt{application/json} & Cas général. Aucun paramètre \texttt{charset} n'est défini~: l'UTF-8 est imposé. \\
+\texttt{application/problem+json} & Erreurs d'API (RFC 9457) \\
+\texttt{application/json-patch+json} & JSON Patch (RFC 6902) \\
+\texttt{application/merge-patch+json} & JSON Merge Patch (RFC 7396) \\
+\texttt{application/ld+json} & JSON-LD \\
+\texttt{application/x-ndjson} & JSON Lines, très utilisé mais non enregistré à l'IANA (préfixe \texttt{x-}) \\
+\bottomrule
+\end{tabularx}
+\caption{Types de média liés à JSON.}
+\label{tab:media}
+\end{table}
+
+
+% ==============================================================================
+% SECTION 11 : RÉFÉRENCES BIBLIOGRAPHIQUES
+% ==============================================================================
+\clearpage
+\phantomsection
+\addcontentsline{toc}{section}{Références bibliographiques}
+\renewcommand{\refname}{Références bibliographiques}
+{
+  \small
+  \let\oldthebibliography=\thebibliography
+  \let\endoldthebibliography=\endthebibliography
+  \renewenvironment{thebibliography}[1]{%
+    \begin{oldthebibliography}{#1}%
+      \setlength{\parskip}{0pt}%
+      \setlength{\itemsep}{1pt plus 0.5pt minus 0.5pt}%
+  }{%
+    \end{oldthebibliography}%
+  }
+  \bibliographystyle{plain}
+  \bibliography{references}
+}
+
+\end{document}
